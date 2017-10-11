@@ -31,6 +31,7 @@ class DocumentationSpider(CrawlSpider, SitemapSpider):
     def __init__(self, config, algolia_helper, strategy, *args, **kwargs):
 
         # Scrapy config
+        self.config = config
         self.name = config.index_name
         self.allowed_domains = config.allowed_domains
         self.start_urls = [start_url['url'] for start_url in config.start_urls]
@@ -79,18 +80,20 @@ class DocumentationSpider(CrawlSpider, SitemapSpider):
         super(DocumentationSpider, self)._compile_rules()
 
     def start_requests(self):
-
         # We crawl according to the sitemap
         if self.sitemap_urls:
             for request in self.start_requests_sitemap():
                 yield request
 
-        # We crawl the start point in order to ensure we didn't miss anything
-        for url in self.start_urls:
-            if self.scrape_start_urls:
-                yield Request(url, dont_filter=False, callback=self.parse_from_start_url)
+        # We crawl the start point in order to ensure we didn't miss anything.
+        #
+        # We use self.config.start_urls and not self.start_urls
+        # because we need the full object to have the value of scrape
+        for start_url in self.config.start_urls:
+            if self.scrape_start_urls and start_url['scrape'] is True:
+                yield Request(start_url['url'], dont_filter=False, callback=self.parse_from_start_url)
             else:
-                yield Request(url, dont_filter=False)
+                yield Request(start_url['url'], dont_filter=False)
 
     def add_records(self, response, from_sitemap):
         records = self.strategy.get_records_from_response(response)
