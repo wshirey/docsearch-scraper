@@ -52,6 +52,7 @@ class ConfigLoader(object):
     user_agent = 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36\
                   (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'
     only_content_level = False
+    query_rules = []
 
     # data storage, starting here attribute are not config params
     config_file = None
